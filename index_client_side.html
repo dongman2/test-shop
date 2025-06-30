@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Express with GTM</title>
+  <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PSRXGRQC');</script>
+<!-- End Google Tag Manager -->
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PSRXGRQC"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+  <h1>Hello, Express!</h1>
+  <button onclick="handleAddToCartButtonClick({ productId: 'prod-1' })">Add to Cart</button>
+  <button onclick="handlePurchaseButtonClick()">Purchase</button>
+  <button onclick="handleHomeButtonClick()">Home</button>
+  <button onclick="handlePageViewButtonClick()">Page View</button>
+  <button onclick="handleAddToWishlistButtonClick()">Add to Wishlist</button>
+  <button onclick="handleItemPageViewButtonClick()">Item Page View</button>
+
+  <form id="searchForm">
+    <input type="text" id="searchInput" placeholder="Search..." required />
+    <button type="submit">Search</button>
+  </form>
+
+  <script>
+    document.cookie = "persistent_id=id_from_cookie; path=/; max-age=" + (60 * 60 * 24 * 365);
+    document.cookie = "user_id=user_id_from_cookie; path=/; max-age=" + (60 * 60 * 24 * 365);
+    
+    // const device = {
+    //   persistent_id: 'new_persistent_id',
+    //   os: 'desktop',
+    //   os_version: '1.0',
+    //   ua: navigator.userAgent
+    // };
+    
+    const product = {
+      id: 'dk-prod-1',
+      title: 'DK Test Product',
+      price: {
+        amount: 449.99,
+        currency: 'USD'
+      }
+    };
+    const product2 = {
+      id: 'dk-prod-2',
+      title: 'DK Test Product 2',
+      price: {
+        amount: 549.99,
+        currency: 'USD'
+      }
+    };
+    const channel_type='SITE'
+
+    const addFn = ({ item }) => {
+      console.log('Item added to cart:', item);
+    };
+  </script>
+  <script>
+  
+    document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const searchQuery = document.getElementById('searchInput').value;
+
+      window.dataLayer = window.dataLayer || [];
+      
+      window.dataLayer.push({
+        event: 'SEARCH',
+        channel_type: channel_type,
+        search_term: searchQuery,
+        
+       
+          
+      });
+
+      console.log('Search event pushed to dataLayer with query:', searchQuery);
+    });
+  </script>
+  <script>
+    
+
+    const handleAddToCartButtonClick = (args) => {
+      const { productId } = args;
+      addFn({ item: { productId, quantity: 1 } });
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ 
+        // device: JSON.stringify(device),
+        channel_type: channel_type,
+        event: 'ADD_TO_CART',
+        currency: product.price.currency,
+        value: product.price.amount,
+        items: [
+          {
+            item_id: product.id,
+            item_name: product.title,
+            price: product.price.amount,
+            quantity: 1
+          },
+          {
+            item_id: product2.id,
+            item_name: product2.title,
+            price: product2.price.amount,
+            quantity: 1
+          }
+        ]
+      });
+    };
+
+    const handlePurchaseButtonClick = () => {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'PURCHASE',
+        channel_type: channel_type,
+        // device: JSON.stringify(device),
+        currency: product.price.currency,
+        revenue: product.price.amount + product2.price.amount,
+        items: [
+          {
+            item_id: product.id,
+            item_name: product.title,
+            price: product.price.amount,
+            quantity: 1
+          },
+          {
+            item_id: product2.id,
+            item_name: product2.title,
+            price: product2.price.amount,
+            quantity: 1
+          }
+        ]
+      });
+      console.log('Purchase event pushed to dataLayer');
+    };
+
+    const handleHomeButtonClick = () => {
+      event.preventDefault();
+      history.pushState(null, '', '/');
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'HOME',
+        channel_type: channel_type
+      });
+
+      console.log('Home button clicked - path changed to /');
+    };
+      
+    const handlePageViewButtonClick = () => {
+      event.preventDefault();
+      history.pushState(null, '', '/page_view');
+      renderPageContent(); // 배너 다시 렌더링
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'PAGE_VIEW',
+        page_id: 'page_view_page',
+        channel_type: channel_type
+      });
+
+      console.log('Page View button clicked - path changed to /page_view');
+    };
+
+    const handleAddToWishlistButtonClick = () => {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ 
+        event: 'ADD_TO_WISHLIST',
+        // device: JSON.stringify(device),
+        channel_type: channel_type,
+        currency: product.price.currency,
+        value: product.price.amount,
+        items: [
+          {
+            item_id: product.id,
+            item_name: product.title,
+            price: product.price.amount,
+            quantity: 1
+          },
+          {
+            item_id: product2.id,
+            item_name: product2.title,
+            price: product2.price.amount,
+            quantity: 1
+          }
+        ]
+      });
+      console.log('Add to Wishlist event pushed to dataLayer');
+    };
+
+    const handleItemPageViewButtonClick = () => {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'ITEM_PAGE_VIEW',
+        // device: JSON.stringify(device),
+        channel_type: channel_type,
+        items: [
+          {
+            item_id: product.id,
+            item_name: product.title,
+            price: product.price.amount,
+            quantity: 1
+          },
+          {
+            item_id: product2.id,
+            item_name: product2.title,
+            price: product2.price.amount,
+            quantity: 1
+          }
+        ]
+      });
+      console.log('Item Page View event pushed to dataLayer');
+    };
+
+    const renderPageContent = () => {
+      const removeExistingBanner = () => {
+        const banner = document.getElementById('pageViewBanner') || document.getElementById('homeBanner');
+        if (banner) banner.remove();
+      };
+
+      removeExistingBanner();
+
+      if (location.pathname === '/page_view') {
+        const banner = document.createElement('div');
+        banner.id = 'pageViewBanner';
+        banner.textContent = 'This is the Page View Page';
+        banner.style.fontSize = '24px';
+        banner.style.color = 'blue';
+        banner.style.marginTop = '20px';
+        document.body.appendChild(banner);
+      } else if (location.pathname === '/') {
+        const banner = document.createElement('div');
+        banner.id = 'homeBanner';
+        banner.textContent = 'This is the Home Page';
+        banner.style.fontSize = '24px';
+        banner.style.color = 'green';
+        banner.style.marginTop = '20px';
+        document.body.appendChild(banner);
+      }
+    };
+
+    window.addEventListener('load', renderPageContent);
+    window.addEventListener('popstate', renderPageContent);
+  </script>
+</body>
+</html>
